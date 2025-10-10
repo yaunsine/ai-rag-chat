@@ -208,11 +208,9 @@ async def update_index(request: UpdateIndexRequest = None):
         raise HTTPException(status_code=500, detail=str(e))
 
 def get_row_params():
-    parser = argparse.ArgumentParser()
     parser = argparse.ArgumentParser(description='RAG API Service')
     parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
     parser.add_argument("--port", type=int, default=8001, help="Port to bind to")
-    parser.add_argument("--workers", type=int, default=1, help="Number of worker processes")
     parser.add_argument("--module", default="chat", help="Module to import")
     parser.add_argument("--prefix", default="/chat", help="API prefix")
     return parser.parse_args()
