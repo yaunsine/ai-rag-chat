@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+
+{% block title %}文档检索问答系统{% endblock %}
+
+{% block sidebar %}
+<div class="p-3">
+    <h4><i class="fas fa-cog"></i> 系统设置</h4>
+    
+    <!-- API地址设置 -->
+    <div class="mb-3">
+        <label class="form-label">API地址:</label>
+        <input type="text" class="form-control" id="apiUrl" value="http://localhost:8000">
+    </div>
+    
+    <!-- 会话管理 -->
+    <h5><i class="fas fa-comments"></i> 会话管理</h5>
+    <button class="btn btn-success btn-sm w-100 mb-2" onclick="createSession()">
+        <i class="fas fa-plus"></i> 创建新会话
+    </button>
+    
+    <div id="sessionInfo" class="d-none">
+        <div class="alert alert-info p-2">
+            <small>会话ID: <span id="sessionId"></span></small>
+        </div>
+        <button class="btn btn-danger btn-sm w-100" onclick="deleteSession()">
+            <i class="fas fa-trash"></i> 删除会话
+        </button>
+    </div>
+    
+    <!-- 文档加载 -->
+    <h5 class="mt-4"><i class="fas fa-file-alt"></i> 文档加载</h5>
+    
+    <!-- 手动输入文档 -->
+    <div class="mb-3">
+        <label class="form-label">手动输入文档:</label>
+        <textarea class="form-control" id="docInput" rows="4" placeholder="每行一个文档"></textarea>
+        <button class="btn btn-primary btn-sm w-100 mt-2" onclick="loadDocuments()">
+            <i class="fas fa-upload"></i> 加载文档
+        </button>
+    </div>
+    
+    <!-- 文件上传 -->
+    <div class="mb-3">
+        <label class="form-label">上传文件:</label>
+        <input type="file" class="form-control" id="fileUpload" multiple accept=".txt,.md">
+        <button class="btn btn-primary btn-sm w-100 mt-2" onclick="uploadFiles()">
+            <i class="fas fa-upload"></i> 上传并加载
+        </button>
+    </div>
+    
+    <!-- 文件夹路径 -->
+    <div class="mb-3">
+        <label class="form-label">从文件夹加载:</label>
+        <input type="text" class="form-control" id="folderPath" placeholder="输入文件夹路径">
+        <button class="btn btn-primary btn-sm w-100 mt-2" onclick="loadFolder()">
+            <i class="fas fa-folder"></i> 加载文件夹
+        </button>
+    </div>
+    
+    <!-- 会话状态 -->
+    <button class="btn btn-info btn-sm w-100" onclick="getSessionStatus()">
+        <i class="fas fa-info-circle"></i> 查看会话状态
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+    <!-- 页面标题 -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="fas fa-book"></i> 文档检索问答系统</h1>
+            <hr>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- 对话区域 -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-comments"></i> 问答对话</h5>
+                </div>
+                <div class="card-body">
+                    <!-- 对话历史 -->
+                    <h6>对话历史</h6>
+                    <div id="chatContainer" class="mb-3" style="max-height: 400px; overflow-y: auto;">
+                        <div class="text-center text-muted" id="emptyChat">
+                            暂无对话记录
+                        </div>
+                    </div>
+                    
+                    <!-- 输入区域 -->
+                    <h6>提出问题</h6>
+                    <textarea class="form-control mb-2" id="userQuery" rows="3" placeholder="请输入您的问题..."></textarea>
+                    
+                    <!-- 查询参数 -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">返回文档数量(top_k):</label>
+                            <input type="range" class="form-range" id="topK" min="1" max="10" value="3">
+                            <span id="topKValue">3</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">相似度阈值:</label>
+                            <input type="range" class="form-range" id="similarityThreshold" min="0" max="100" value="1">
+                            <span id="thresholdValue">0.01</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary w-100" onclick="submitQuery()">
+                        <i class="fas fa-paper-plane"></i> 提交查询
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 使用说明 -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> 使用说明</h5>
+                </div>
+                <div class="card-body">
+                    <h6>如何使用本系统</h6>
+                    <ol class="small">
+                        <li><strong>创建会话</strong> - 在左侧边栏点击"创建新会话"</li>
+                        <li><strong>加载文档</strong> - 手动输入文档内容、上传文件或指定文件夹路径</li>
+                        <li><strong>开始对话</strong> - 在主区域输入问题并点击"提交查询"</li>
+                        <li><strong>管理会话</strong> - 可随时创建新会话或删除不需要的会话</li>
+                    </ol>
+                    
+                    <h6>系统特性</h6>
+                    <ul class="small">
+                        <li>📚 支持多种文档加载方式</li>
+                        <li>💬 对话式交互体验</li>
+                        <li>🔍 基于TF-IDF的文档检索</li>
+                        <li>🧠 结合大模型的智能回答</li>
+                        <li>🗂️ 多会话管理</li>
+                    </ul>
+                    
+                    <!-- 当前会话信息 -->
+                    <div id="currentSessionInfo" class="d-none">
+                        <hr>
+                        <h6>当前会话信息</h6>
+                        <div class="alert alert-info p-2">
+                            <small>会话ID: <span id="displaySessionId"></span></small>
+                        </div>
+                        <div class="alert alert-info p-2">
+                            <small>对话轮数: <span id="conversationCount">0</span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页脚 -->
+    <div class="row mt-4">
+        <div class="col">
+            <hr>
+            <p class="text-center text-muted small">
+                📚 文档检索问答系统 | 基于RAG技术构建
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 全局变量
+let sessionId = null;
+let conversationHistory = [];
+
+// 更新滑块显示值
+document.getElementById('topK').addEventListener('input', function() {
+    document.getElementById('topKValue').textContent = this.value;
+});
+
+document.getElementById('similarityThreshold').addEventListener('input', function() {
+    document.getElementById('thresholdValue').textContent = (this.value / 100).toFixed(2);
+});
+
+// 创建会话
+async function createSession() {
+    const apiUrl = document.getElementById('apiUrl').value;
+    
+    try {
+        const response = await fetch(`${apiUrl}/sessions`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            sessionId = data.session_id;
+            conversationHistory = [];
+            
+            // 更新UI
+            document.getElementById('sessionInfo').classList.remove('d-none');
+            document.getElementById('sessionId').textContent = sessionId.substring(0, 8) + '...';
+            document.getElementById('currentSessionInfo').classList.remove('d-none');
+            document.getElementById('displaySessionId').textContent = sessionId.substring(0, 8) + '...';
+            updateConversationCount();
+            
+            showAlert('会话创建成功', 'success');
+        } else {
+            throw new Error('创建会话失败');
+        }
+    } catch (error) {
+        showAlert('连接API失败: ' + error.message, 'danger');
+    }
+}
+
+// 删除会话
+async function deleteSession() {
+    if (!sessionId) return;
+    
+    const apiUrl = document.getElementById('apiUrl').value;
+    
+    try {
+        const response = await fetch(`${apiUrl}/sessions/${sessionId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            sessionId = null;
+            conversationHistory = [];
+            
+            // 更新UI
+            document.getElementById('sessionInfo').classList.add('d-none');
+            document.getElementById('currentSessionInfo').classList.add('d-none');
+            document.getElementById('chatContainer').innerHTML = '<div class="text-center text-muted">暂无对话记录</div>';
+            
+            showAlert('会话已删除', 'success');
+        } else {
+            throw new Error('删除会话失败');
+        }
+    } catch (error) {
+        showAlert('连接API失败: ' + error.message, 'danger');
+    }
+}
+
+// 加载文档
+async function loadDocuments() {
+    if (!sessionId) {
+        showAlert('请先创建会话', 'warning');
+        return;
+    }
+    
+    const apiUrl = document.getElementById('apiUrl').value;
+    const docInput = document.getElementById('docInput').value;
+    
+    if (!docInput.trim()) {
+        showAlert('请输入文档内容', 'warning');
+        return;
+    }
+    
+    const documents = docInput.split('\n').filter(doc => doc.trim());
+    
+    try {
+        const response = await fetch(`${apiUrl}/load_documents?session_id=${sessionId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ documents })
+        });
+        
+        if (response.ok) {
+            showAlert('文档加载成功', 'success');
+            document.getElementById('docInput').value = '';
+        } else {
+            throw new Error(await response.text());
+        }
+    } catch (error) {
+        showAlert('加载文档失败: ' + error.message, 'danger');
+    }
+}
+
+// 上传文件
+async function uploadFiles() {
+    if (!sessionId) {
+        showAlert('请先创建会话', 'warning');
+        return;
+    }
+    
+    const apiUrl = document.getElementById('apiUrl').value;
+    const fileInput = document.getElementById('fileUpload');
+    
+    if (!fileInput.files.length) {
+        showAlert('请选择文件', 'warning');
+        return;
+    }
+    
+    const formData = new FormData();
+    for (let file of fileInput.files) {
+        formData.append('files', file);
+    }
+    
+    try {
+        const response = await fetch(`${apiUrl}/upload_and_load?session_id=${sessionId}`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            showAlert('文件上传并加载成功', 'success');
+            fileInput.value = '';
+        } else {
+            throw new Error(await response.text());
+        }
+    } catch (error) {
+        showAlert('上传文件失败: ' + error.message, 'danger');
+    }
+}
+
+// 加载文件夹
+async function loadFolder() {
+    if (!sessionId) {
+        showAlert('请先创建会话', 'warning');
+        return;
+    }
+    
+    const apiUrl = document.getElementById('apiUrl').value;
+    const folderPath = document.getElementById('folderPath').value;
+    
+    if (!folderPath.trim()) {
+        showAlert('请输入文件夹路径', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${apiUrl}/load_folder?session_id=${sessionId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ folder_path: folderPath })
+        });
+        
+        if (response.ok) {
+            showAlert('文件夹加载成功', 'success');
+            document.getElementById('folderPath').value = '';
+        } else {
+            throw new Error(await response.text());
+        }
+    } catch (error) {
+        showAlert('加载文件夹失败: ' + error.message, 'danger');
+    }
+}
+
+// 提交查询
+async function submitQuery() {
+    if (!sessionId) {
+        showAlert('请先创建会话', 'warning');
+        return;
+    }
+    
+    const apiUrl = document.getElementById('apiUrl').value;
+    const userQuery = document.getElementById('userQuery').value;
+    const topK = document.getElementById('topK').value;
+    const similarityThreshold = document.getElementById('similarityThreshold').value / 100;
+    
+    if (!userQuery.trim()) {
+        showAlert('请输入问题', 'warning');
+        return;
+    }
+    
+    try {
+        // 添加用户消息到对话历史
+        addMessageToChat('user', userQuery);
+        conversationHistory.push({ role: 'user', content: userQuery });
+        
+        // 清空输入框
+        document.getElementById('userQuery').value = '';
+        
+        const response = await fetch(`${apiUrl}/query`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query: userQuery,
+                session_id: sessionId,
+                top_k: parseInt(topK),
+                similarity_threshold: similarityThreshold
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            
+            // 添加助手消息到对话历史
+            addMessageToChat('assistant', result.answer, result.retrieved_documents);
+            conversationHistory.push({
+                role: 'assistant',
+                content: result.answer,
+                retrieved_docs: result.retrieved_documents
+            });
+            
+            updateConversationCount();
+        } else {
+            throw new Error(await response.text());
+        }
+    } catch (error) {
+        showAlert('查询失败: ' + error.message, 'danger');
+    }
+}
+
+// 添加消息到聊天界面
+function addMessageToChat(role, content, retrievedDocs = null) {
+    const chatContainer = document.getElementById('chatContainer');
+    const emptyChat = document.getElementById('emptyChat');
+    
+    if (emptyChat) {
+        emptyChat.remove();
+    }
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${role === 'user' ? 'user-message' : 'assistant-message'}`;
+    
+    const roleIcon = role === 'user' ? '👤' : '🤖';
+    const roleText = role === 'user' ? '你' : '助手';
+    
+    messageDiv.innerHTML = `
+        <strong>${roleIcon} ${roleText}:</strong> ${content}
+        <div class="message-time">${new Date().toLocaleTimeString()}</div>
+    `;
+    
+    if (retrievedDocs && retrievedDocs.length > 0) {
+        const expanderDiv = document.createElement('div');
+        expanderDiv.className = 'mt-2';
+        
+        const expanderButton = document.createElement('button');
+        expanderButton.className = 'btn btn-sm btn-outline-secondary';
+        expanderButton.setAttribute('type', 'button');
+        expanderButton.setAttribute('data-bs-toggle', 'collapse');
+        expanderButton.setAttribute('data-bs-target', `#docs-${Date.now()}`);
+        expanderButton.textContent = '查看检索到的文档';
+        
+        const collapseDiv = document.createElement('div');
+        collapseDiv.className = 'collapse mt-2';
+        collapseDiv.id = `docs-${Date.now()}`;
+        
+        let docsHtml = '';
+        retrievedDocs.forEach(doc => {
+            docsHtml += `
+                <div class="card mb-2">
+                    <div class="card-body p-2">
+                        <small><strong>相关度:</strong> ${doc.similarity.toFixed(4)}</small><br>
+                        <small><strong>内容:</strong> ${doc.content}</small>
+                    </div>
+                </div>
+            `;
+        });
+        collapseDiv.innerHTML = docsHtml;
+        
+        expanderDiv.appendChild(expanderButton);
+        expanderDiv.appendChild(collapseDiv);
+        messageDiv.appendChild(expanderDiv);
+    }
+    
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+// 更新对话轮数
+function updateConversationCount() {
+    const count = conversationHistory.filter(msg => msg.role === 'user').length;
+    document.getElementById('conversationCount').textContent = count;
+}
+
+// 获取会话状态
+async function getSessionStatus() {
+    if (!sessionId) {
+        showAlert('请先创建会话', 'warning');
+        return;
+    }
+    
+    const apiUrl = document.getElementById('apiUrl').value;
+    
+    try {
+        const response = await fetch(`${apiUrl}/status?session_id=${sessionId}`);
+        
+        if (response.ok) {
+            const statusData = await response.json();
+            showAlert('会话状态: ' + JSON.stringify(statusData, null, 2), 'info');
+        } else {
+            throw new Error('获取状态失败');
+        }
+    } catch (error) {
+        showAlert('连接API失败: ' + error.message, 'danger');
+    }
+}
+
+// 显示提示信息
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // 5秒后自动消失
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}
