@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Configuration (contains API keys - DO NOT commit)
+config.yaml

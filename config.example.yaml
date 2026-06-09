@@ -1,0 +1,43 @@
+# ============================================================
+# 原视界AI咨询专家 - 应用配置
+# ============================================================
+# 使用方式:
+#   1. 复制此文件为 config.yaml
+#   2. 填入真实的 API Key 等敏感信息
+#   3. config.yaml 已被 .gitignore 忽略，不会提交到 git
+# ============================================================
+
+# ---- 大模型配置 (DeepSeek) ----
+llm:
+  provider: deepseek            # 大模型提供商
+  model: deepseek-reasoner      # 模型名称
+  api_key: "your-api-key-here"  # DeepSeek API Key
+
+# ---- 阿里云配置 ----
+aliyun:
+  access_key_id: "your-aliyun-key-id"
+  access_key_secret: "your-aliyun-key-secret"
+
+# ---- 嵌入模型配置 ----
+embedding:
+  model: BAAI/bge-small-zh-v1.5  # HuggingFace 嵌入模型
+  device: cpu                    # 运行设备: cpu / cuda
+  cache_folder: ./models         # 模型缓存目录
+
+# ---- 模型缓存 ----
+modelscope:
+  cache_dir: ./llms              # ModelScope 模型下载缓存
+
+# ---- 数据与存储 ----
+data:
+  documents_dir: data_dir        # 知识库文档目录
+  database: data_dir/conversations.db  # SQLite 对话数据库
+
+# ---- 服务配置 ----
+server:
+  host: 0.0.0.0
+  port: 8001
+
+# ---- 日志 ----
+logging:
+  level: INFO                    # DEBUG / INFO / WARNING / ERROR
