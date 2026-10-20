@@ -1,5 +1,5 @@
 # ============================================================
-# 原视界AI咨询专家 - 应用配置
+# 陶瓷制造知识库助手 - 应用配置
 # ============================================================
 # 使用方式:
 #   1. 复制此文件为 config.yaml
@@ -30,8 +30,49 @@ modelscope:
 
 # ---- 数据与存储 ----
 data:
-  documents_dir: data_dir        # 知识库文档目录
+  documents_dir: data_dir/knowledge_base  # 知识库文档目录（仅索引该目录）
   database: data_dir/conversations.db  # SQLite 对话数据库
+
+# ---- 向量库（Milvus）----
+# uri 填本地文件路径 = Milvus Lite（零部署，单机开发）；填 http://host:19530 = 独立 Milvus
+vector_store:
+  uri: data_dir/milvus.db        # Milvus Lite 数据文件，或 http://localhost:19530
+  token: ""                      # 独立部署且开了鉴权时填写
+  collection: mom_chat_chunks    # 集合名
+  metric: COSINE                 # COSINE / IP / L2
+  dim: 0                         # 0 = 自动探测嵌入模型维度
+  storage_dir: data_dir/storage  # 文档库/索引清单持久化目录
+  consistency_level: Session
+  filter_lite_noise: true        # 过滤 Milvus Lite 不支持 RPC 造成的噪音日志
+
+# ---- 检索链路：双路召回 + RRF 融合 + 精排 ----
+retrieval:
+  dense:                         # 稠密召回（Milvus 向量相似度）
+    enabled: true
+    top_k: 10
+  sparse:                        # 稀疏召回（jieba 分词 + BM25 关键词）
+    enabled: true
+    top_k: 10
+    bm25_k1: 1.5
+    bm25_b: 0.75
+  fusion:                        # RRF 融合
+    method: rrf                  # score = Σ weight / (k + rank)
+    k: 60
+    weights: [1.0, 1.0]          # [稠密, 稀疏]
+    top_k: 10                    # 融合后进入精排的候选数
+  rerank:                        # 精排（Cross-Encoder）
+    enabled: true
+    model: BAAI/bge-reranker-base
+    device: cpu
+    top_n: 5                     # 最终送入大模型的片段数
+    score_mode: auto             # auto/probability/logit：精排分归一化方式（auto 自适应）
+    min_relevance: 0.02          # 相关度低于该值的片段直接丢弃（0=不过滤）
+
+# ---- 文本切分 ----
+chunking:
+  chunk_size: 512
+  chunk_overlap: 64
+  file_extensions: [".txt", ".md", ".pdf", ".docx", ".doc", ".csv"]
 
 # ---- 服务配置 ----
 server:

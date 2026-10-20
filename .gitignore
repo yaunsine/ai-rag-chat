@@ -8,6 +8,19 @@ wheels/
 
 # Virtual environments
 .venv
+venv/
 
 # Configuration (contains API keys - DO NOT commit)
 config.yaml
+config/app.yml
+
+# ---- è¿è¡Œæ—¶æ•°æ®ï¼ˆå‘é‡åº“ / æ–‡æ¡£åº“ / æ¨¡å‹ç¼“å­˜ï¼‰----
+data_dir/milvus.db
+data_dir/storage/
+data_dir/*.db
+llms/
+models/
+volumes/
+
+# ¸öÈË²İ¸å£¨¹«ÖÚºÅÎÄÕÂ£¬·¢²¼Ç°ĞèÍÑÃôÉóºË£©
+docs/wechat_article.md

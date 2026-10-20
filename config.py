@@ -105,9 +105,21 @@ def get_logging_config() -> dict:
     return load_config().get("logging", {})
 
 
+def get_vector_store_config() -> dict:
+    return load_config().get("vector_store", {})
+
+
+def get_retrieval_config() -> dict:
+    return load_config().get("retrieval", {})
+
+
+def get_chunking_config() -> dict:
+    return load_config().get("chunking", {})
+
+
 def get_documents_dir() -> Path:
     data = get_data_config()
-    path = Path(data.get("documents_dir", "data_dir"))
+    path = Path(data.get("documents_dir", "data_dir/knowledge_base"))
     if not path.is_absolute():
         path = Path(__file__).parent / path
     return path

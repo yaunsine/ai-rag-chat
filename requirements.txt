@@ -6,5 +6,18 @@ uvicorn==0.37.0
 python-multipart==0.0.20
 llama-index-llms-openai==0.6.4
 llama-index-llms-openai-like==0.5.3
+llama-index-llms-deepseek==0.2.2
 llama-index-embeddings-huggingface==0.6.1
 modelscope==1.30.0
+
+# ---- 向量库（Milvus：本地 Lite 文件 / 独立服务同一套 API）----
+pymilvus==2.6.17
+milvus-lite==3.2.2
+llama-index-vector-stores-milvus==1.2.0
+
+# ---- 稀疏召回（jieba 分词 + BM25）----
+jieba==0.42.1
+bm25s==0.3.13
+
+# ---- 精排（Cross-Encoder）----
+sentence-transformers==5.1.1

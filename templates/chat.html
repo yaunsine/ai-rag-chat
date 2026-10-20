@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>原视界AI咨询专家</title>
+    <title>陶瓷制造知识库助手</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -169,6 +169,33 @@
             color: var(--text-sidebar-muted);
             font-size: 13px;
             pointer-events: none;
+        }
+
+        .sidebar-kb-link {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin: 0 16px 10px;
+            padding: 9px 12px;
+            border-radius: var(--radius-xs);
+            background: rgba(99,102,241,0.16);
+            border: 1px solid rgba(129,140,248,0.28);
+            color: var(--text-sidebar);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-kb-link:hover {
+            background: rgba(99,102,241,0.28);
+            border-color: var(--primary-light);
+            color: #fff;
+        }
+
+        .sidebar-kb-link i {
+            font-size: 13px;
+            color: var(--primary-light);
         }
 
         .sidebar-conversations {
@@ -595,6 +622,115 @@
         .message-bubble p { margin-bottom: 4px; }
         .message-bubble p:last-child { margin-bottom: 0; }
 
+        /* Citation sources (RAG) */
+        .message-row { flex-wrap: wrap; }
+
+        .citation-block {
+            width: 100%;
+            max-width: 72%;
+            margin: 8px 0 0 48px;
+            font-size: 12.5px;
+            animation: messageIn 0.3s ease;
+        }
+
+        .citation-trace {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .citation-trace > i { color: var(--primary); }
+
+        .trace-chip {
+            background: var(--primary-50);
+            color: var(--primary-dark);
+            border: 1px solid #C7D2FE;
+            border-radius: 999px;
+            padding: 2px 9px;
+            white-space: nowrap;
+        }
+
+        .citation-title {
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .citation-title i { color: var(--primary); }
+
+        .citation-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary-light);
+            border-radius: var(--radius-xs);
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            box-shadow: var(--shadow-sm);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .citation-card:hover {
+            border-left-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .citation-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .citation-index {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .citation-file { font-weight: 600; color: var(--text-primary); }
+        .citation-chunk { color: var(--text-secondary); }
+        .citation-score {
+            margin-left: auto;
+            color: #059669;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        .citation-snippet {
+            color: var(--text-secondary);
+            line-height: 1.55;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .citation-meta {
+            margin-top: 5px;
+            color: #94A3B8;
+            font-size: 11.5px;
+        }
+
+        @media (max-width: 768px) {
+            .citation-block { max-width: 100%; margin-left: 0; }
+        }
+
         /* Streaming cursor */
         .streaming-cursor::after {
             content: '';
@@ -885,7 +1021,7 @@
             <div class="sidebar-header">
                 <div class="sidebar-logo">
                     <div class="logo-icon"><i class="fas fa-brain"></i></div>
-                    <span class="logo-text">AI咨询专家</span>
+                    <span class="logo-text">陶瓷知识库</span>
                 </div>
                 <button class="btn-new-chat" id="btnNewChat">
                     <i class="fas fa-plus"></i> 新对话
@@ -897,6 +1033,10 @@
                     <input type="text" id="searchInput" placeholder="搜索对话..." autocomplete="off">
                 </div>
             </div>
+            <a class="sidebar-kb-link" href="/knowledge">
+                <i class="fas fa-folder-tree"></i>
+                浏览知识库
+            </a>
             <div class="sidebar-conversations" id="convList">
                 <div class="sidebar-empty" id="sidebarEmpty">
                     <i class="fas fa-inbox fa-2x" style="opacity:0.4;margin-bottom:8px;display:block;"></i>
@@ -913,7 +1053,7 @@
                     <button class="btn-mobile-menu" id="btnMobileMenu" title="菜单">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <span class="header-title" id="headerTitle">原视界AI咨询专家</span>
+                    <span class="header-title" id="headerTitle">陶瓷制造知识库助手</span>
                 </div>
                 <div class="header-actions">
                     <button class="btn-header" id="btnUpdateIndex" title="更新知识库索引">
@@ -931,11 +1071,11 @@
                 <div class="empty-state" id="emptyState">
                     <div class="empty-icon"><i class="fas fa-comments"></i></div>
                     <h2>有什么可以帮你的？</h2>
-                    <p>我是原视界科技AI咨询专家，可以回答关于公司业务和产品的各类问题。</p>
+                    <p>我是陶瓷制造知识库助手，可以回答原料配方、生产工艺、设备窑炉、质量检测等方面的问题。</p>
                     <div class="empty-suggestions">
-                        <button class="suggestion-chip" data-query="原视界科技是做什么的？">原视界科技是做什么的？</button>
-                        <button class="suggestion-chip" data-query="AI咨询专家有哪些功能？">AI咨询专家有哪些功能？</button>
-                        <button class="suggestion-chip" data-query="如何接入AI咨询专家？">如何接入AI咨询专家？</button>
+                        <button class="suggestion-chip" data-query="陶瓷砖的生产工艺流程是什么？">陶瓷砖的生产工艺流程是什么？</button>
+                        <button class="suggestion-chip" data-query="窑炉烧成温度如何控制？">窑炉烧成温度如何控制？</button>
+                        <button class="suggestion-chip" data-query="瓷砖中心裂的原因和解决办法？">瓷砖中心裂的原因和解决办法？</button>
                     </div>
                 </div>
             </div>
@@ -1063,6 +1203,81 @@
             dom.messagesContainer.scrollTop = dom.messagesContainer.scrollHeight;
         }
 
+        // ==================== 引用来源 / 检索链路渲染 ====================
+        function parseSseEvent(raw) {
+            let event = 'message';
+            let data = null;
+            raw.split('\n').forEach(line => {
+                if (line.startsWith('event:')) {
+                    event = line.slice(6).trim();
+                } else if (line.startsWith('data:')) {
+                    const payload = line.slice(5).trim();
+                    try { data = JSON.parse(payload); } catch (e) { data = null; }
+                }
+            });
+            return data === null ? null : { event, data };
+        }
+
+        function channelText(s) {
+            const parts = [];
+            if (s.dense_rank) parts.push(`稠密 #${s.dense_rank}`);
+            if (s.sparse_rank) parts.push(`稀疏 #${s.sparse_rank}`);
+            parts.push(`RRF ${(s.rrf_score || 0).toFixed(4)}`);
+            return '命中通道：' + parts.join(' · ');
+        }
+
+        function sourcesBlockHtml(metadata) {
+            const sources = (metadata && metadata.sources) || [];
+            const trace = (metadata && metadata.trace) || {};
+            const timings = (metadata && metadata.timings) || {};
+            const chips = [];
+
+            if (trace.dense) chips.push(`稠密召回 ${trace.dense.enabled ? trace.dense.hits : '关闭'}`);
+            if (trace.sparse) chips.push(`稀疏召回 ${trace.sparse.enabled ? trace.sparse.hits : '关闭'}`);
+            if (trace.fusion) {
+                chips.push(`RRF 融合 ${trace.fusion.candidates}` + (trace.fusion.hit_both ? `（双路命中 ${trace.fusion.hit_both}）` : ''));
+            }
+            if (trace.rerank) chips.push(`精排保留 ${trace.rerank.kept}`);
+            if (timings.retrieval_ms) chips.push(`检索耗时 ${timings.retrieval_ms}ms`);
+
+            if (!chips.length && !sources.length) return '';
+
+            let html = '<div class="citation-block">';
+            if (chips.length) {
+                html += `<div class="citation-trace"><i class="fas fa-diagram-project"></i>${
+                    chips.map(c => `<span class="trace-chip">${escapeHtml(c)}</span>`).join('')
+                }</div>`;
+            }
+            if (sources.length) {
+                html += '<div class="citation-title"><i class="fas fa-book-open"></i>引用来源</div>';
+                html += sources.map(s => `
+                    <div class="citation-card">
+                        <div class="citation-head">
+                            <span class="citation-index">${s.index}</span>
+                            <span class="citation-file" title="${escapeHtml(s.file_path || '')}">${escapeHtml(s.file_name)}</span>
+                            ${s.chunk ? `<span class="citation-chunk">第 ${s.chunk} 片</span>` : ''}
+                            ${s.relevance != null ? `<span class="citation-score">相关度 ${(s.relevance * 100).toFixed(1)}%</span>` : ''}
+                        </div>
+                        <div class="citation-snippet">${escapeHtml(s.snippet || '')}</div>
+                        <div class="citation-meta">${escapeHtml(channelText(s))}</div>
+                    </div>
+                `).join('');
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function attachSources(rowEl, metadata) {
+            if (!rowEl || !metadata) return;
+            const existing = rowEl.querySelector('.citation-block');
+            if (existing) existing.remove();
+            const html = sourcesBlockHtml(metadata);
+            if (!html) return;
+            const holder = document.createElement('div');
+            holder.innerHTML = html;
+            rowEl.appendChild(holder.firstElementChild);
+        }
+
         // ==================== Auto-resize textarea ====================
         dom.userInput.addEventListener('input', () => {
             dom.userInput.style.height = 'auto';
@@ -1151,7 +1366,7 @@
                 dom.headerTitle.textContent = conv ? conv.title : '对话';
                 dom.btnClearConv.style.display = 'inline-flex';
             } else {
-                dom.headerTitle.textContent = '原视界AI咨询专家';
+                dom.headerTitle.textContent = '陶瓷制造知识库助手';
                 dom.btnClearConv.style.display = 'none';
             }
         }
@@ -1259,12 +1474,12 @@
 
             dom.emptyState.style.display = 'none';
             state.currentMessages.forEach(msg => {
-                appendMessageElement(msg.role, msg.content, false);
+                appendMessageElement(msg.role, msg.content, false, msg.metadata);
             });
             scrollToBottom();
         }
 
-        function appendMessageElement(role, content, animate = true) {
+        function appendMessageElement(role, content, animate = true, metadata = null) {
             dom.emptyState.style.display = 'none';
 
             const row = document.createElement('div');
@@ -1279,6 +1494,7 @@
             `;
 
             dom.messagesContainer.appendChild(row);
+            if (metadata) attachSources(row, metadata);
             scrollToBottom();
             return row;
         }
@@ -1411,6 +1627,7 @@
             const streamingBubble = createStreamingBubble('assistant');
 
             let accumulatedText = '';
+            let metadata = null;
 
             try {
                 const res = await fetch('/stream-query', {
@@ -1426,25 +1643,51 @@
 
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder();
+                let buffer = '';
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
 
-                    const chunk = decoder.decode(value, { stream: true });
-                    accumulatedText += chunk;
-                    streamingBubble.innerHTML = formatContent(accumulatedText);
-                    streamingBubble.classList.add('streaming-cursor');
-                    scrollToBottom();
+                    buffer += decoder.decode(value, { stream: true });
+                    // SSE 以空行分隔事件；最后一段可能被截断，留到下一轮再拼
+                    const segments = buffer.split('\n\n');
+                    buffer = segments.pop();
+
+                    for (const segment of segments) {
+                        const evt = parseSseEvent(segment);
+                        if (!evt) continue;
+
+                        if (evt.event === 'token') {
+                            accumulatedText += evt.data.text || '';
+                            streamingBubble.innerHTML = formatContent(accumulatedText);
+                            streamingBubble.classList.add('streaming-cursor');
+                            scrollToBottom();
+                        } else if (evt.event === 'retrieval') {
+                            // 检索链路先到，先展示链路，再等答案
+                            attachSources(streamingBubble.closest('.message-row'), { sources: [], trace: evt.data.trace });
+                        } else if (evt.event === 'sources') {
+                            metadata = {
+                                sources: evt.data.sources || [],
+                                trace: evt.data.trace || {},
+                                timings: evt.data.timings || {}
+                            };
+                        } else if (evt.event === 'error') {
+                            throw new Error(evt.data.message || '检索出错');
+                        }
+                    }
                 }
 
                 // Remove streaming cursor
                 streamingBubble.classList.remove('streaming-cursor');
                 streamingBubble.innerHTML = formatContent(accumulatedText);
+                if (metadata) {
+                    attachSources(streamingBubble.closest('.message-row'), metadata);
+                }
 
                 // Update local state
                 state.currentMessages.push({ role: 'user', content: query });
-                state.currentMessages.push({ role: 'assistant', content: accumulatedText });
+                state.currentMessages.push({ role: 'assistant', content: accumulatedText, metadata });
 
                 // Auto-generate title from first message
                 if (isFirstMessage) {
@@ -1476,7 +1719,7 @@
                         await fetch(`/api/conversations/${state.currentConvId}/messages`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ role: 'assistant', content: accumulatedText })
+                            body: JSON.stringify({ role: 'assistant', content: accumulatedText, metadata })
                         });
                     } catch (e) { /* ignore */ }
                 }
@@ -1529,7 +1772,7 @@
                 const res = await fetch('/update-index', { method: 'POST' });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const result = await res.json();
-                showToast(`索引更新成功！加载了 ${result.documents_count} 个文档`);
+                showToast(`索引更新成功：${result.documents_count} 个文档 / ${result.chunks} 个片段，向量库 ${result.vector_rows} 行`);
             } catch (err) {
                 showToast('索引更新失败：' + err.message, 'error');
                 console.error(err);

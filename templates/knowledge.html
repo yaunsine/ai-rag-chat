@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识库浏览 · 陶瓷制造知识库助手</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #818CF8;
+            --primary-dark: #4F46E5;
+            --primary-50: #EEF2FF;
+            --bg: #F8FAFC;
+            --sidebar-bg: #1E1B4B;
+            --surface: #FFFFFF;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --text-sidebar: #CBD5E1;
+            --text-sidebar-muted: #94A3B8;
+            --border: #E2E8F0;
+            --danger: #EF4444;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+            --radius-sm: 10px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --sidebar-width: 310px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        [hidden] { display: none !important; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        button, input { font-family: inherit; }
+
+        .app-layout { display: flex; height: 100vh; width: 100%; }
+
+        /* ========== Sidebar ========== */
+        .sidebar {
+            width: var(--sidebar-width);
+            flex: 0 0 var(--sidebar-width);
+            background: linear-gradient(180deg, #1E1B4B 0%, #17153A 100%);
+            color: var(--text-sidebar);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255,255,255,0.06);
+            z-index: 50;
+        }
+
+        .sidebar-header { padding: 22px 20px 14px; }
+
+        .sidebar-logo { display: flex; align-items: center; gap: 11px; }
+
+        .logo-icon {
+            width: 38px; height: 38px; border-radius: 11px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 17px;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+        }
+
+        .logo-text { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: 0.2px; }
+        .sidebar-subtitle { margin-top: 6px; font-size: 10px; color: var(--text-sidebar-muted); letter-spacing: 2px; text-transform: uppercase; }
+
+        .sidebar-nav { padding: 2px 12px 12px; display: flex; flex-direction: column; gap: 4px; }
+
+        .nav-link {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 9px;
+            color: var(--text-sidebar); text-decoration: none;
+            font-size: 13px; font-weight: 500;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+        }
+        .nav-link i { width: 16px; text-align: center; font-size: 13px; }
+        .nav-link:hover { background: rgba(255,255,255,0.07); color: #fff; }
+        .nav-link.active { background: rgba(99,102,241,0.24); border-color: rgba(129,140,248,0.35); color: #fff; }
+
+        .sidebar-stats {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 6px; padding: 0 14px 12px;
+        }
+        .sidebar-stats > div {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 9px; padding: 8px 4px; text-align: center;
+        }
+        .sidebar-stats strong { display: block; font-size: 14px; color: #fff; font-weight: 600; }
+        .sidebar-stats span { display: block; margin-top: 2px; font-size: 10px; color: var(--text-sidebar-muted); }
+
+        .sidebar-search { padding: 0 14px 10px; }
+        .search-wrapper { position: relative; }
+        .search-wrapper i {
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+            color: var(--text-sidebar-muted); font-size: 12px; pointer-events: none;
+        }
+        .search-wrapper input {
+            width: 100%; padding: 9px 12px 9px 34px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px; color: var(--text-sidebar);
+            font-size: 12px; outline: none; transition: all 0.15s ease;
+        }
+        .search-wrapper input::placeholder { color: var(--text-sidebar-muted); }
+        .search-wrapper input:focus { background: rgba(255,255,255,0.11); border-color: var(--primary-light); }
+
+        .tree-wrap {
+            flex: 1; overflow-y: auto; padding: 2px 8px 18px;
+            scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent;
+        }
+        .tree-wrap::-webkit-scrollbar { width: 4px; }
+        .tree-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+
+        .tree-dir > summary {
+            list-style: none; display: flex; align-items: center; gap: 6px;
+            padding: 8px; border-radius: 8px; cursor: pointer;
+            color: var(--text-sidebar); font-size: 12.5px; font-weight: 500;
+            user-select: none;
+        }
+        .tree-dir > summary::-webkit-details-marker { display: none; }
+        .tree-dir > summary:hover { background: rgba(255,255,255,0.06); }
+        .tree-dir[open] > summary .chevron { transform: rotate(90deg); }
+        .chevron { width: 10px; font-size: 9px; color: var(--text-sidebar-muted); transition: transform 0.15s ease; }
+        .folder-icon { color: #FBBF24; font-size: 12px; }
+        .tree-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .tree-count {
+            margin-left: auto; flex-shrink: 0;
+            font-size: 10px; color: var(--text-sidebar-muted);
+            background: rgba(255,255,255,0.07); padding: 1px 6px; border-radius: 999px;
+        }
+
+        .tree-file {
+            display: flex; align-items: center; gap: 7px;
+            padding: 6px 8px; border-radius: 7px; cursor: pointer;
+            color: var(--text-sidebar-muted); font-size: 11.5px;
+            white-space: nowrap; overflow: hidden;
+            transition: all 0.12s ease;
+        }
+        .tree-file:hover { background: rgba(255,255,255,0.06); color: var(--text-sidebar); }
+        .tree-file.active { background: rgba(99,102,241,0.32); color: #fff; }
+        .tree-file i { flex-shrink: 0; font-size: 11px; opacity: 0.8; }
+        .tree-file .tree-label { flex: 1; }
+
+        .sidebar-footer {
+            padding: 11px 16px; border-top: 1px solid rgba(255,255,255,0.06);
+            font-size: 10px; line-height: 1.5; color: var(--text-sidebar-muted);
+        }
+
+        .tree-loading, .tree-error { padding: 16px 10px; font-size: 12px; color: var(--text-sidebar-muted); text-align: center; }
+        .tree-error { color: #FCA5A5; }
+
+        /* ========== Main ========== */
+        .main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
+
+        .topbar {
+            height: 64px; flex: 0 0 64px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 28px; background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border);
+        }
+        .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .breadcrumb {
+            font-size: 13px; color: var(--text-secondary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 60vw;
+        }
+        .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+        .main-scroll { flex: 1; overflow-y: auto; scroll-behavior: smooth; }
+        .view { max-width: 1080px; margin: 0 auto; padding: 36px 40px 72px; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 12px; border-radius: 8px;
+            font-size: 12.5px; font-weight: 500; text-decoration: none;
+            border: 1px solid transparent; cursor: pointer;
+            transition: all 0.15s ease; white-space: nowrap;
+        }
+        .btn-ghost { background: #fff; border-color: var(--border); color: var(--text-secondary); }
+        .btn-ghost:hover { border-color: var(--primary-light); color: var(--primary-dark); background: var(--primary-50); }
+        .btn-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 8px;
+            background: transparent; border: 1px solid transparent;
+            color: var(--text-secondary); cursor: pointer; font-size: 15px;
+        }
+        .btn-icon:hover { background: var(--primary-50); color: var(--primary-dark); }
+
+        /* ========== Welcome ========== */
+        .hero { margin-bottom: 30px; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 10px; border-radius: 999px;
+            background: var(--primary-50); color: var(--primary-dark);
+            font-size: 11px; font-weight: 600; margin-bottom: 14px;
+        }
+        .hero h1 { font-size: 34px; line-height: 1.2; letter-spacing: -0.5px; margin-bottom: 10px; }
+        .hero p { max-width: 720px; font-size: 14px; line-height: 1.8; color: var(--text-secondary); }
+
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+        .stat-card {
+            display: flex; align-items: center; gap: 14px;
+            padding: 18px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+        .stat-icon {
+            width: 42px; height: 42px; border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--primary-50); color: var(--primary-dark); font-size: 17px;
+        }
+        .stat-card strong { display: block; font-size: 22px; line-height: 1.1; }
+        .stat-card span { display: block; margin-top: 3px; font-size: 11px; color: var(--text-secondary); }
+
+        .section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .section-title h2 { font-size: 17px; }
+        .section-title span { font-size: 11px; color: var(--text-secondary); }
+
+        .category-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .category-card {
+            display: flex; align-items: center; gap: 14px;
+            padding: 16px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: var(--radius-md);
+            text-align: left; cursor: pointer; transition: all 0.15s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .category-card:hover { border-color: var(--primary-light); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+        .category-icon {
+            width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: #F1F5F9; color: var(--primary-dark); font-size: 16px;
+        }
+        .category-info { flex: 1; min-width: 0; }
+        .category-info strong { display: block; font-size: 13.5px; margin-bottom: 3px; }
+        .category-info span { display: block; font-size: 11px; color: var(--text-secondary); }
+        .category-arrow { color: #CBD5E1; font-size: 12px; }
+
+        .tip-card {
+            display: flex; gap: 12px; margin-top: 26px; padding: 16px 18px;
+            background: #FFFBEB; border: 1px solid #FDE68A; border-radius: var(--radius-md);
+            color: #92400E; font-size: 12.5px; line-height: 1.7;
+        }
+        .tip-card i { margin-top: 3px; color: #D97706; }
+        .tip-card strong { display: block; margin-bottom: 2px; color: #78350F; }
+
+        /* ========== Doc / Category ========== */
+        .view-head { margin-bottom: 12px; }
+        .doc-head { margin-bottom: 24px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+        .doc-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+        .doc-head h1 { font-size: 27px; line-height: 1.35; letter-spacing: -0.3px; }
+        .doc-head > p { margin-top: 8px; font-size: 13px; color: var(--text-secondary); }
+        .doc-actions { display: flex; gap: 8px; flex-shrink: 0; padding-top: 3px; }
+        .doc-meta { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; font-size: 11.5px; color: var(--text-secondary); }
+        .doc-meta span { display: inline-flex; align-items: center; gap: 6px; }
+
+        .file-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .file-card {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: var(--radius-md);
+            text-align: left; cursor: pointer; transition: all 0.15s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .file-card:hover { border-color: var(--primary-light); box-shadow: var(--shadow-md); }
+        .file-card > i { color: var(--primary); font-size: 17px; flex-shrink: 0; }
+        .file-card-body { flex: 1; min-width: 0; }
+        .file-card-body strong {
+            display: block; font-size: 13px; margin-bottom: 3px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .file-card-body span {
+            display: block; font-size: 10.5px; color: var(--text-secondary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .file-size { font-size: 10.5px; color: var(--text-secondary); flex-shrink: 0; }
+
+        /* ========== Search results ========== */
+        .search-result {
+            display: flex; gap: 14px; width: 100%;
+            padding: 16px; margin-bottom: 10px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-md); text-align: left; cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .search-result:hover { border-color: var(--primary-light); box-shadow: var(--shadow-md); }
+        .result-icon {
+            width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--primary-50); color: var(--primary-dark); font-size: 15px;
+        }
+        .result-body { flex: 1; min-width: 0; }
+        .result-title { font-size: 13.5px; font-weight: 600; margin-bottom: 3px; }
+        .result-path { font-size: 10.5px; color: var(--text-secondary); margin-bottom: 7px; word-break: break-all; }
+        .result-body p { font-size: 12px; line-height: 1.7; color: #475569; }
+        .result-match { flex-shrink: 0; align-self: flex-start; font-size: 10px; color: var(--text-secondary); background: #F1F5F9; padding: 2px 7px; border-radius: 999px; }
+
+        /* ========== Markdown / Tables ========== */
+        .markdown-body { font-size: 14.5px; line-height: 1.85; color: var(--text-primary); }
+        .markdown-body > :first-child { margin-top: 0; }
+        .markdown-body h1 { font-size: 29px; line-height: 1.3; margin: 0 0 16px; }
+        .markdown-body h2 { font-size: 21px; line-height: 1.4; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+        .markdown-body h3 { font-size: 17px; margin: 24px 0 10px; }
+        .markdown-body h4 { font-size: 15px; margin: 20px 0 8px; }
+        .markdown-body p { margin: 12px 0; }
+        .markdown-body ul, .markdown-body ol { margin: 10px 0; padding-left: 24px; }
+        .markdown-body li { margin: 5px 0; }
+        .markdown-body blockquote {
+            margin: 16px 0; padding: 12px 16px;
+            border-left: 4px solid var(--primary); background: var(--primary-50);
+            color: #334155; border-radius: 0 8px 8px 0;
+        }
+        .markdown-body blockquote p { margin: 4px 0; }
+        .markdown-body code {
+            background: #F1F5F9; padding: 2px 6px; border-radius: 4px;
+            font-size: 12.5px; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+        }
+        .markdown-body pre {
+            background: #0F172A; color: #E2E8F0; padding: 16px;
+            border-radius: 10px; overflow-x: auto; margin: 16px 0; line-height: 1.6;
+        }
+        .markdown-body pre code { background: transparent; color: inherit; padding: 0; }
+        .markdown-body a { color: var(--primary-dark); text-decoration: none; }
+        .markdown-body a:hover { text-decoration: underline; }
+        .markdown-body hr { border: none; border-top: 1px solid var(--border); margin: 26px 0; }
+        .markdown-body img { max-width: 100%; border-radius: 8px; }
+
+        .table-wrap { width: 100%; overflow-x: auto; margin: 16px 0; border: 1px solid var(--border); border-radius: 9px; }
+        .markdown-body table, .csv-table { width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 560px; }
+        .markdown-body th, .markdown-body td, .csv-table th, .csv-table td {
+            border-bottom: 1px solid var(--border); border-right: 1px solid #F1F5F9;
+            padding: 8px 10px; text-align: left; vertical-align: top; line-height: 1.6;
+        }
+        .markdown-body th, .csv-table th {
+            background: #F1F5F9; font-weight: 600; color: #334155;
+            position: sticky; top: 0; white-space: nowrap;
+        }
+        .markdown-body tr:last-child td, .csv-table tr:last-child td { border-bottom: none; }
+        .markdown-body tr:nth-child(even) td, .csv-table tr:nth-child(even) td { background: #FAFBFC; }
+        .table-note { margin: 8px 0 20px; font-size: 11px; color: var(--text-secondary); }
+
+        .plain-text {
+            margin: 0; padding: 18px; background: #0F172A; color: #E2E8F0;
+            border-radius: 10px; overflow-x: auto; font-size: 12.5px; line-height: 1.75;
+            white-space: pre-wrap; word-break: break-word;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+        }
+
+        .empty-state {
+            padding: 48px 20px; text-align: center; color: var(--text-secondary);
+            background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-md);
+            font-size: 13px; line-height: 1.8;
+        }
+        .empty-state i { display: block; font-size: 28px; margin-bottom: 10px; opacity: 0.35; }
+
+        .mobile-overlay { display: none; }
+        .mobile-only { display: none; }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                position: fixed; top: 0; bottom: 0; left: 0;
+                width: 300px; flex-basis: 300px;
+                transform: translateX(-100%);
+                transition: transform 0.2s ease;
+                box-shadow: 0 0 40px rgba(0,0,0,0.3);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .mobile-overlay {
+                display: none; position: fixed; inset: 0;
+                background: rgba(15,23,42,0.45); z-index: 40;
+            }
+            .mobile-overlay.show { display: block; }
+            .mobile-only { display: inline-flex; }
+            .topbar { padding: 0 16px; }
+            .view { padding: 24px 18px 60px; }
+            .hero h1 { font-size: 27px; }
+            .stat-grid { grid-template-columns: 1fr; }
+            .category-grid, .file-grid { grid-template-columns: 1fr; }
+            .doc-title-row { flex-direction: column; }
+            .doc-head h1 { font-size: 23px; }
+            .breadcrumb { max-width: 48vw; }
+            .hide-mobile { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <div class="app-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="logo-icon"><i class="fas fa-brain"></i></div>
+                    <span class="logo-text">陶瓷知识库</span>
+                </div>
+                <div class="sidebar-subtitle">Knowledge Base</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a class="nav-link" href="/chat"><i class="fas fa-comments"></i><span>智能问答</span></a>
+                <a class="nav-link active" href="/knowledge"><i class="fas fa-folder-tree"></i><span>知识库浏览</span></a>
+            </nav>
+
+            <div class="sidebar-stats">
+                <div><strong id="sideFiles">-</strong><span>文件</span></div>
+                <div><strong id="sideDirs">-</strong><span>分类</span></div>
+                <div><strong id="sideSize">-</strong><span>总量</span></div>
+            </div>
+
+            <div class="sidebar-search">
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="search" id="kbSearch" placeholder="搜索文件名或正文..." autocomplete="off">
+                </div>
+            </div>
+
+            <div class="tree-wrap" id="tree">
+                <div class="tree-loading">加载目录中...</div>
+            </div>
+
+            <div class="sidebar-footer">目录规范见 docs/knowledge_base_standard.md</div>
+        </aside>
+
+        <main class="main">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="btn-icon mobile-only" id="btnMenu" title="打开目录">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb" id="breadcrumb">知识库</div>
+                </div>
+                <div class="topbar-actions">
+                    <a class="btn btn-ghost" href="/chat">
+                        <i class="fas fa-comments"></i><span class="hide-mobile">智能问答</span>
+                    </a>
+                </div>
+            </header>
+
+            <div class="main-scroll" id="mainScroll">
+                <section id="welcomeView" class="view">
+                    <div class="hero">
+                        <div class="hero-badge"><i class="fas fa-database"></i> 知识库</div>
+                        <h1>陶瓷制造知识库</h1>
+                        <p>按主题浏览原料配方、生产工艺、设备窑炉、质量检测、标准规范和生产管理资料。左侧目录可直接打开文件，搜索框会在文件名和正文中查找关键词。</p>
+                    </div>
+
+                    <div class="stat-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-file-lines"></i></div>
+                            <div><strong id="statFiles">-</strong><span>文档总数</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-folder-open"></i></div>
+                            <div><strong id="statDirs">-</strong><span>一级分类</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-hard-drive"></i></div>
+                            <div><strong id="statSize">-</strong><span>文档总量</span></div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">
+                        <h2>按分类浏览</h2>
+                        <span>点击分类查看文件列表</span>
+                    </div>
+                    <div class="category-grid" id="categoryGrid"></div>
+
+                    <div class="tip-card">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>两种查找方式</strong>
+                            <p>这里适合按目录定位和精确关键词查找；问答页走「向量 + BM25」双路召回和精排，适合直接用自然语言提问。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="categoryView" class="view" hidden>
+                    <div class="view-head">
+                        <button class="btn btn-ghost" id="btnBackHome"><i class="fas fa-arrow-left"></i> 返回总览</button>
+                    </div>
+                    <div class="doc-head">
+                        <h1 id="categoryTitle"></h1>
+                        <p id="categorySubtitle"></p>
+                    </div>
+                    <div class="file-grid" id="fileGrid"></div>
+                </section>
+
+                <section id="searchView" class="view" hidden>
+                    <div class="view-head">
+                        <button class="btn btn-ghost" id="btnBackHome2"><i class="fas fa-arrow-left"></i> 返回总览</button>
+                    </div>
+                    <div class="doc-head">
+                        <h1>搜索结果</h1>
+                        <p id="searchSummary"></p>
+                    </div>
+                    <div class="search-results" id="searchResults"></div>
+                </section>
+
+                <section id="viewerView" class="view" hidden>
+                    <div class="doc-head">
+                        <div class="doc-title-row">
+                            <h1 id="docTitle"></h1>
+                            <div class="doc-actions">
+                                <button class="btn btn-ghost" id="btnCopyPath"><i class="fas fa-copy"></i> 复制路径</button>
+                                <a class="btn btn-ghost" id="btnDownload" href="#"><i class="fas fa-download"></i> 下载</a>
+                            </div>
+                        </div>
+                        <div class="doc-meta" id="docMeta"></div>
+                    </div>
+                    <article class="doc-content" id="docContent"></article>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        const state = { tree: null, currentPath: null, allFiles: [] };
+        const $ = (id) => document.getElementById(id);
+        const views = { welcome: 'welcomeView', category: 'categoryView', search: 'searchView', viewer: 'viewerView' };
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[ch]));
+        }
+
+        function formatBytes(bytes) {
+            if (!bytes) return '0 B';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let value = Number(bytes);
+            let index = 0;
+            while (value >= 1024 && index < units.length - 1) {
+                value /= 1024;
+                index += 1;
+            }
+            return `${value.toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
+        }
+
+        async function api(url) {
+            const response = await fetch(url);
+            if (!response.ok) {
+                let message = response.statusText;
+                try {
+                    const data = await response.json();
+                    message = data.detail || message;
+                } catch (err) { /* ignore */ }
+                throw new Error(message);
+            }
+            return response.json();
+        }
+
+        function iconFor(ext) {
+            return ({
+                md: 'fa-file-lines', markdown: 'fa-file-lines', csv: 'fa-table',
+                txt: 'fa-file-alt', json: 'fa-code', yaml: 'fa-code', yml: 'fa-code'
+            })[ext] || 'fa-file';
+        }
+
+        function categoryIcon(name) {
+            if (name.startsWith('00')) return 'fa-flask';
+            if (name.startsWith('01')) return 'fa-gears';
+            if (name.startsWith('02')) return 'fa-industry';
+            if (name.startsWith('03')) return 'fa-clipboard-check';
+            if (name.startsWith('04')) return 'fa-book';
+            if (name.startsWith('05')) return 'fa-chart-line';
+            if (name.startsWith('06')) return 'fa-globe';
+            return 'fa-folder';
+        }
+
+        function flatten(nodes) {
+            return nodes.flatMap((node) => node.type === 'dir' ? flatten(node.children) : [node]);
+        }
+
+        function findNode(nodes, path) {
+            for (const node of nodes) {
+                if (node.path === path) return node;
+                if (node.type === 'dir') {
+                    const found = findNode(node.children, path);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        function showView(name) {
+            Object.entries(views).forEach(([key, id]) => {
+                $(id).hidden = key !== name;
+            });
+            $('mainScroll').scrollTop = 0;
+        }
+
+        function setBreadcrumb(parts) {
+            $('breadcrumb').textContent = parts.join(' / ');
+        }
+
+        function showWelcome() {
+            state.currentPath = null;
+            $('kbSearch').value = '';
+            setBreadcrumb(['知识库']);
+            history.replaceState(null, '', '/knowledge');
+            document.querySelectorAll('.tree-file.active').forEach((el) => el.classList.remove('active'));
+            showView('welcome');
+        }
+
+        function renderTree(nodes, container, depth = 0) {
+            nodes.forEach((node) => {
+                if (node.type === 'dir') {
+                    const details = document.createElement('details');
+                    details.className = 'tree-dir';
+                    details.open = depth === 0;
+                    const summary = document.createElement('summary');
+                    summary.style.paddingLeft = `${8 + depth * 14}px`;
+                    summary.innerHTML = `
+                        <i class="fas fa-chevron-right chevron"></i>
+                        <i class="fas fa-folder folder-icon"></i>
+                        <span class="tree-label">${escapeHtml(node.name)}</span>
+                        <span class="tree-count">${node.file_count}</span>`;
+                    details.appendChild(summary);
+                    const children = document.createElement('div');
+                    children.className = 'tree-children';
+                    renderTree(node.children, children, depth + 1);
+                    details.appendChild(children);
+                    container.appendChild(details);
+                } else {
+                    const file = document.createElement('div');
+                    file.className = 'tree-file';
+                    file.dataset.path = node.path;
+                    file.style.paddingLeft = `${26 + depth * 14}px`;
+                    file.title = node.name;
+                    file.innerHTML = `<i class="fas ${iconFor(node.ext)}"></i><span class="tree-label">${escapeHtml(node.name)}</span>`;
+                    file.addEventListener('click', () => loadFile(node.path));
+                    container.appendChild(file);
+                }
+            });
+        }
+
+        function renderWelcome(data) {
+            $('sideFiles').textContent = data.total_files;
+            $('sideDirs').textContent = data.top_dirs;
+            $('sideSize').textContent = formatBytes(data.total_size);
+            $('statFiles').textContent = data.total_files;
+            $('statDirs').textContent = data.top_dirs;
+            $('statSize').textContent = formatBytes(data.total_size);
+
+            const grid = $('categoryGrid');
+            grid.innerHTML = data.tree.filter((node) => node.type === 'dir').map((node) => `
+                <button class="category-card" data-path="${escapeHtml(node.path)}">
+                    <div class="category-icon"><i class="fas ${categoryIcon(node.name)}"></i></div>
+                    <div class="category-info">
+                        <strong>${escapeHtml(node.name)}</strong>
+                        <span>${node.file_count} 个文件</span>
+                    </div>
+                    <i class="fas fa-arrow-right category-arrow"></i>
+                </button>`).join('');
+
+            grid.querySelectorAll('.category-card').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const node = findNode(data.tree, button.dataset.path);
+                    if (node) showCategory(node);
+                });
+            });
+        }
+
+        function showCategory(node) {
+            state.currentPath = null;
+            history.replaceState(null, '', '/knowledge');
+            document.querySelectorAll('.tree-file.active').forEach((el) => el.classList.remove('active'));
+            setBreadcrumb(['知识库', node.name]);
+            $('categoryTitle').textContent = node.name;
+            const files = flatten(node.children);
+            $('categorySubtitle').textContent = `${files.length} 个文件`;
+            const grid = $('fileGrid');
+            grid.innerHTML = files.map((file) => `
+                <button class="file-card" data-path="${escapeHtml(file.path)}">
+                    <i class="fas ${iconFor(file.ext)}"></i>
+                    <div class="file-card-body">
+                        <strong>${escapeHtml(file.name.replace(/\.[^.]+$/, ''))}</strong>
+                        <span>${escapeHtml(file.path)}</span>
+                    </div>
+                    <span class="file-size">${formatBytes(file.size)}</span>
+                </button>`).join('');
+            grid.querySelectorAll('.file-card').forEach((button) => {
+                button.addEventListener('click', () => loadFile(button.dataset.path));
+            });
+            showView('category');
+        }
+
+        function highlightTree(path) {
+            document.querySelectorAll('.tree-file').forEach((el) => {
+                const active = el.dataset.path === path;
+                el.classList.toggle('active', active);
+                if (active) {
+                    let parent = el.parentElement;
+                    while (parent) {
+                        if (parent.tagName === 'DETAILS') parent.open = true;
+                        parent = parent.parentElement;
+                    }
+                    el.scrollIntoView({ block: 'nearest' });
+                }
+            });
+        }
+
+        function renderMarkdown(text) {
+            if (window.marked && typeof window.marked.parse === 'function') {
+                const html = window.marked.parse(text, { gfm: true, breaks: false });
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = html;
+                wrapper.querySelectorAll('a').forEach((anchor) => {
+                    anchor.target = '_blank';
+                    anchor.rel = 'noopener noreferrer';
+                });
+                wrapper.querySelectorAll('table').forEach((table) => {
+                    const scroll = document.createElement('div');
+                    scroll.className = 'table-wrap';
+                    table.parentNode.insertBefore(scroll, table);
+                    scroll.appendChild(table);
+                });
+                return wrapper.innerHTML;
+            }
+            return `<pre class="plain-text">${escapeHtml(text)}</pre>`;
+        }
+
+        function renderCsv(rows, truncated) {
+            if (!rows || !rows.length) {
+                return '<div class="empty-state"><i class="fas fa-table"></i>空表</div>';
+            }
+            const header = rows[0];
+            let html = '<div class="table-wrap"><table class="csv-table"><thead><tr>';
+            html += header.map((cell) => `<th>${escapeHtml(cell)}</th>`).join('');
+            html += '</tr></thead><tbody>';
+            for (let index = 1; index < rows.length; index += 1) {
+                html += '<tr>';
+                html += header.map((_, column) => `<td>${escapeHtml(rows[index][column] ?? '')}</td>`).join('');
+                html += '</tr>';
+            }
+            html += '</tbody></table></div>';
+            if (truncated) {
+                html += '<p class="table-note">仅显示前 500 行，完整数据请下载原文。</p>';
+            }
+            return html;
+        }
+
+        function renderFile(data) {
+            state.currentPath = data.path;
+            $('docTitle').textContent = data.title || data.name;
+            $('docMeta').innerHTML = `
+                <span><i class="fas fa-folder"></i>${escapeHtml(data.path)}</span>
+                <span><i class="fas fa-file"></i>${escapeHtml((data.ext || '').toUpperCase())}</span>
+                <span><i class="fas fa-weight-hanging"></i>${formatBytes(data.size)}</span>
+                <span><i class="fas fa-clock"></i>${escapeHtml(data.modified)}</span>`;
+            $('btnDownload').href = `/api/knowledge/download?path=${encodeURIComponent(data.path)}`;
+
+            const content = $('docContent');
+            if (data.format === 'markdown') {
+                content.className = 'doc-content markdown-body';
+                content.innerHTML = renderMarkdown(data.content || '');
+            } else if (data.format === 'csv') {
+                content.className = 'doc-content';
+                content.innerHTML = renderCsv(data.rows, data.truncated);
+            } else if (data.format === 'text') {
+                content.className = 'doc-content';
+                content.innerHTML = `<pre class="plain-text">${escapeHtml(data.content || '')}</pre>`;
+            } else if (data.format === 'too_large') {
+                content.className = 'doc-content';
+                content.innerHTML = '<div class="empty-state"><i class="fas fa-triangle-exclamation"></i>文件超过 2 MB，暂不预览。<br>请点击右上角「下载」查看原文。</div>';
+            } else {
+                content.className = 'doc-content';
+                content.innerHTML = '<div class="empty-state"><i class="fas fa-file-circle-question"></i>该文件类型暂不支持在线预览。<br>请点击右上角「下载」查看原文。</div>';
+            }
+        }
+
+        async function loadFile(path, updateUrl = true) {
+            try {
+                const data = await api(`/api/knowledge/file?path=${encodeURIComponent(path)}`);
+                renderFile(data);
+                setBreadcrumb(['知识库', ...path.split('/')]);
+                highlightTree(path);
+                showView('viewer');
+                if (updateUrl) {
+                    history.replaceState(null, '', `/knowledge?path=${encodeURIComponent(path)}`);
+                }
+            } catch (error) {
+                alert(`打开文件失败：${error.message}`);
+            }
+        }
+
+        let searchTimer = null;
+
+        async function runSearch(query) {
+            showView('search');
+            setBreadcrumb(['知识库', '搜索']);
+            $('searchSummary').textContent = `正在搜索“${query}”...`;
+            $('searchResults').innerHTML = '';
+            try {
+                const data = await api(`/api/knowledge/search?q=${encodeURIComponent(query)}`);
+                $('searchSummary').textContent = data.total
+                    ? `“${query}” 共找到 ${data.total} 个文件`
+                    : `没有找到与“${query}”匹配的内容`;
+                if (!data.results.length) {
+                    $('searchResults').innerHTML = '<div class="empty-state"><i class="fas fa-magnifying-glass"></i>换个关键词试试，例如「窑炉」「釉料」「中心裂」「吸水率」。</div>';
+                    return;
+                }
+                $('searchResults').innerHTML = data.results.map((item) => `
+                    <button class="search-result" data-path="${escapeHtml(item.path)}">
+                        <div class="result-icon"><i class="fas ${iconFor(item.ext)}"></i></div>
+                        <div class="result-body">
+                            <div class="result-title">${escapeHtml(item.name)}</div>
+                            <div class="result-path">${escapeHtml(item.path)}</div>
+                            <p>${escapeHtml(item.snippet)}</p>
+                        </div>
+                        <span class="result-match">${item.matches} 处</span>
+                    </button>`).join('');
+                $('searchResults').querySelectorAll('.search-result').forEach((button) => {
+                    button.addEventListener('click', () => loadFile(button.dataset.path));
+                });
+            } catch (error) {
+                $('searchSummary').textContent = '搜索失败';
+                $('searchResults').innerHTML = `<div class="empty-state"><i class="fas fa-triangle-exclamation"></i>${escapeHtml(error.message)}</div>`;
+            }
+        }
+
+        function closeMobileMenu() {
+            $('sidebar').classList.remove('open');
+            $('mobileOverlay').classList.remove('show');
+        }
+
+        $('kbSearch').addEventListener('input', (event) => {
+            clearTimeout(searchTimer);
+            const query = event.target.value.trim();
+            if (!query) {
+                showWelcome();
+                return;
+            }
+            searchTimer = setTimeout(() => runSearch(query), 250);
+        });
+
+        $('btnMenu').addEventListener('click', () => {
+            $('sidebar').classList.add('open');
+            $('mobileOverlay').classList.add('show');
+        });
+        $('mobileOverlay').addEventListener('click', closeMobileMenu);
+        $('btnBackHome').addEventListener('click', showWelcome);
+        $('btnBackHome2').addEventListener('click', showWelcome);
+
+        $('btnCopyPath').addEventListener('click', async () => {
+            if (!state.currentPath) return;
+            const button = $('btnCopyPath');
+            const original = button.innerHTML;
+            try {
+                await navigator.clipboard.writeText(state.currentPath);
+                button.innerHTML = '<i class="fas fa-check"></i> 已复制';
+            } catch (error) {
+                button.innerHTML = '<i class="fas fa-xmark"></i> 复制失败';
+            }
+            setTimeout(() => { button.innerHTML = original; }, 1500);
+        });
+
+        (async function init() {
+            try {
+                const data = await api('/api/knowledge/tree');
+                state.tree = data;
+                state.allFiles = flatten(data.tree);
+                renderWelcome(data);
+                const tree = $('tree');
+                tree.innerHTML = '';
+                renderTree(data.tree, tree);
+
+                const path = new URLSearchParams(location.search).get('path');
+                if (path) {
+                    await loadFile(path, false);
+                } else {
+                    showView('welcome');
+                }
+            } catch (error) {
+                $('tree').innerHTML = `<div class="tree-error">目录加载失败<br>${escapeHtml(error.message)}</div>`;
+            }
+        })();
+    </script>
+</body>
+</html>
