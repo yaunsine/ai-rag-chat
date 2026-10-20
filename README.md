@@ -2,7 +2,9 @@
 
 基于 FastAPI + LlamaIndex 的 RAG 智能问答系统，面向陶瓷制造生产场景，支持流式对话、对话持久化和多会话管理。
 
-![界面截图](imgs/img.png)
+![智能问答界面](imgs/chat.png)
+
+![知识库浏览界面](imgs/knowledge.png)
 
 ## 项目结构
 
@@ -192,3 +194,5 @@ event: done        data: {"conversation_id": "...", "timings": {...}}
 - **HuggingFace** — 嵌入模型 (bge-small-zh-v1.5)
 - **SQLite** — 对话与引用元数据持久化
 - **Jinja2** — 模板引擎
+
+> AI生成
